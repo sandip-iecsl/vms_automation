@@ -7,6 +7,7 @@ class MasterPage {
     async navigateTo(subModule) {
         await this.masterMenu.click();
         await this.page.getByText(subModule, { exact: true }).click();
+        // await this.resultsTable.waitFor({ state: 'visible', timeout: 10000 });
     }
 }
 module.exports = { MasterPage };

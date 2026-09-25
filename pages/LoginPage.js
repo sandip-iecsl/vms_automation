@@ -14,6 +14,7 @@ class LoginPage {
         await this.unameInput.fill(username);
         await this.pwdInput.fill(password);
         await this.loginButton.click();
+        // await this.resultsTable.waitFor({ state: 'visible', timeout: 5000 });
     }
 }
 module.exports = { LoginPage };
