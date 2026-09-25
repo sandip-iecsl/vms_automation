@@ -1,0 +1,19 @@
+# Sensitive API keys and credentials
+.env
+
+# Dependencies
+node_modules/
+
+# Playwright execution outputs & reports
+test-results/
+playwright-report/
+reports/
+dom_snapshots/
+page_content.html
+
+# Office temporary lock files
+~$*.docx
+~$*.xlsx
+
+# System logs
+*.log
