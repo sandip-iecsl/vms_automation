@@ -2,20 +2,37 @@ const fs = require('fs');
 const path = require('path');
 
 class JsonReporter {
+    /**
+     * Accepts reporter options configured in playwright.config.js
+     * @param {Object} options Options passed from Playwright configuration
+     */
+    constructor(options = {}) {
+        this.options = options;
+    }
+
     onBegin(config, suite) {
         this.suite = suite;
     }
 
     onEnd(result) {
-        const reportsDir = path.join(process.cwd(), 'reports');
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, '-');
+
+        // Determine destination file path from options or fallback to default
+        let reportFile;
+        if (this.options && this.options.outputFile) {
+            reportFile = path.isAbsolute(this.options.outputFile)
+                ? this.options.outputFile
+                : path.join(process.cwd(), this.options.outputFile);
+        } else {
+            reportFile = path.join(process.cwd(), 'reports', `Execution_Report_${timestamp}.json`);
+        }
+
+        const reportsDir = path.dirname(reportFile);
         if (!fs.existsSync(reportsDir)) {
             fs.mkdirSync(reportsDir, { recursive: true });
         }
 
-        const now = new Date();
-        const timestamp = now.toISOString().replace(/[:.]/g, '-');
-
-        const reportFile = path.join(reportsDir, `Execution_Report_${timestamp}.json`);
         const latestFile = path.join(reportsDir, `Latest_Execution_Report.json`);
 
         const allTests = this.suite ? this.suite.allTests() : [];
@@ -51,13 +68,13 @@ class JsonReporter {
                 skipped++;
             }
 
-            // Extract Module and TC ID from path
+            // Extract Module and TC ID from file path
             const relativePath = path.relative(process.cwd(), test.location.file);
             const pathParts = relativePath.split(path.sep);
             const moduleName = pathParts.length >= 3 ? pathParts[2] : 'General';
             const fileName = path.basename(relativePath, '.spec.js');
 
-            // Module aggregation
+            // Aggregate metrics by module
             if (!moduleStats[moduleName]) {
                 moduleStats[moduleName] = { total: 0, passed: 0, failed: 0, skipped: 0 };
             }
@@ -66,7 +83,7 @@ class JsonReporter {
             else if (status === 'FAILED') moduleStats[moduleName].failed++;
             else moduleStats[moduleName].skipped++;
 
-            // Extract annotations
+            // Extract description from annotations if present
             const descAnno = test.annotations.find(a => a.type === 'description');
             const description = descAnno ? descAnno.description : null;
 
@@ -90,7 +107,7 @@ class JsonReporter {
         const totalTests = allTests.length;
         const passRate = totalTests > 0 ? parseFloat(((passed / totalTests) * 100).toFixed(2)) : 0.0;
 
-        // Structured JSON Object
+        // Structured JSON Output Payload
         const jsonReport = {
             metadata: {
                 title: "Playwright Test Execution Summary",

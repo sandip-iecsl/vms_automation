@@ -8,12 +8,14 @@ module.exports = defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ['line'],
-    ['html'],
-    ['./reporters/JsonReporter.js'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['./reporters/JsonReporter.js', { outputFile: 'reports/custom-report.json' }],
     ['./reporters/MarkdownReporter.js']
   ],
   use: {
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
   projects: [
     {
