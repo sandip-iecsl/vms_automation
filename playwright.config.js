@@ -9,6 +9,7 @@ module.exports = defineConfig({
   reporter: [
     ['line'],
     ['html'],
+    ['./reporters/JsonReporter.js'],
     ['./reporters/MarkdownReporter.js']
   ],
   use: {
